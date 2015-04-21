@@ -1,13 +1,16 @@
-spanner.py
+# spanner
+Cluster Distribution and Management
 
-class CFG
-# read configurations of spanner.cfg
+## spanner.py
 
-def spanner_* ()
-# functions for spanner itself
+#### class CFG
+read configurations of spanner.cfg
 
-def action_* ()
-# functions for handle user commands
+#### def spanner_* ()
+functions for spanner itself
 
-def _* ()
-# private functions
+#### def action_* ()
+functions for handle user commands
+
+#### def _* ()
+private functions
