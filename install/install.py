@@ -68,8 +68,8 @@ def configure_cobbler():
     
     text = open('/etc/cobbler/settings').read()
     text = re.sub(r'^manage_dhcp\s*:.*$', 'manage_dhcp: 1', text, 0, re.M)
-    text = re.sub(r'^server\s*:.*$', 'server: 0.0.0.0', text, 0, re.M)
-    text = re.sub(r'^next_server\s*:.*$', 'next_server: 0.0.0.0', text, 0, re.M)
+    text = re.sub(r'^server\s*:.*$', 'server: ' + CFG.network_address, text, 0, re.M)
+    text = re.sub(r'^next_server\s*:.*$', 'next_server: ' + CFG.network_address, text, 0, re.M)
     out = open('/etc/cobbler/settings', 'w')
     out.write(text)
     out.close
