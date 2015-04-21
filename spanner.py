@@ -56,7 +56,7 @@ def ipmi_shutdown(address, username, password):
 def cobbler_import(hostname, address_ipv4, address_mac, password, interface, disk):
     p1 = subprocess.Popen('cobbler system remove --name=' + hostname, shell=True, stdout=subprocess.PIPE)
     out, err = p1.communicate()
-    p2 = subprocess.Popen('cobbler system add --name=' + hostname + ' --profile=' + CFG.cobber_profile + ' --mac=' + address_mac + ' --ip-address=' + address_ipv4 + ' --subnet=' + CFG.network_netmask + ' --gateway=' + CFG.network_gateway + ' --interface=ethx --name-servers=' + CFG.network_nameservers + ' --dns-name=' + hostname + '.localdomain --hostname=' + hostname + '.localdomain --kickstart=' + CFG.spanner_home + '/spanner.seed --kopts="netcfg/choose_interface=' + interface + ' partman-auto/disk=' + disk + '" --ksmeta="spanner_eth=' + interface + ' spanner_pwd=' + password + ' spanner_src=' + CFG.cobber_repository + '" 2>&1', shell=True, stdout=subprocess.PIPE)
+    p2 = subprocess.Popen('cobbler system add --name=' + hostname + ' --profile=' + CFG.cobber_profile + ' --mac=' + address_mac + ' --ip-address=' + address_ipv4 + ' --subnet=' + CFG.network_netmask + ' --gateway=' + CFG.network_gateway + ' --interface=ethx --name-servers=' + CFG.network_nameservers + ' --dns-name=' + hostname + '.localdomain --hostname=' + hostname + '.localdomain --kickstart=' + CFG.spanner_home + '/www/spanner.seed --kopts="netcfg/choose_interface=' + interface + ' partman-auto/disk=' + disk + '" --ksmeta="spanner_eth=' + interface + ' spanner_pwd=' + password + ' spanner_src=' + CFG.cobber_repository + '" 2>&1', shell=True, stdout=subprocess.PIPE)
     out, err = p2.communicate()
     return True
 
