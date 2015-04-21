@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 
+import time
 import os
 import re
+import struct
+import socket
 import subprocess
 import ConfigParser
 
@@ -9,7 +12,7 @@ PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 class SpannerConfigParser (type):
     config = ConfigParser.ConfigParser()
-    config.read('../spanner.cfg')
+    config.read(PATH + '/spanner.cfg')
     def __getattr__(self, name):
         return self.config.get('DEFAULT', name.lower())
 
@@ -29,6 +32,18 @@ def accessible(path):
         print path + ' not accessible!\n'
         return False
     return True
+
+def ip2uint(addr):                                                               
+    return struct.unpack("!I", socket.inet_aton(addr))[0]                       
+
+def uint2ip(addr):                                                               
+    return socket.inet_ntoa(struct.pack("!I", addr)) 
+
+def subnet(address, netmask):
+    _address = ip2uint(address)
+    _netmask = ip2uint(netmask)
+    _subnet = _address&_netmask
+    return uint2ip(_subnet)
 
 def configure_apache():
     version = execute("apache2 -V | grep -i 'server\sversion' | awk -F ':' '{print $2}' | awk '{print $1}' | awk -F '/' '{print $2}'")
@@ -62,7 +77,7 @@ def configure_cobbler():
     
     text = open('/etc/cobbler/dhcp.template').read()
     text = re.sub(r'subnet[0-9\.\s]*netmask[0-9\.\s]*{[^}]*}',
-'subnet ' + CFG.network_gateway + ' netmask ' + CFG.network_netmask + ' {\n' \
+'subnet ' + subnet(CFG.network_gateway,CFG.network_netmask) + ' netmask ' + CFG.network_netmask + ' {\n' \
 '     option routers             ' + CFG.network_gateway + ';\n' \
 '     option domain-name-servers ' + CFG.network_nameservers + ';\n' \
 '     option subnet-mask         ' + CFG.network_netmask + ';\n' \
@@ -75,11 +90,12 @@ def configure_cobbler():
     out = open('/etc/cobbler/dhcp.template', 'w')
     out.write(text)
     out.close
-    
+      
 
 if __name__ == "__main__":
     configure_apache()
     print execute('service apache2 restart')
     configure_cobbler()
     print execute('service cobbler restart')
+    time.sleep(1)
     print execute('cobbler sync')
