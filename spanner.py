@@ -176,8 +176,6 @@ def _action_batch_echo_output(output):
         print lines[x]
 
 def action_batch(data, command, async):
-    if not os.path.exists(CFG.spanner_home + '/log/'): os.makedirs(CFG.spanner_home + '/log/')
-       
     if async == False:
         for row in data:
             print row[0] + " begin"
@@ -196,14 +194,14 @@ def action_batch(data, command, async):
             t.start()
             count = count + 1
         
-        fl = open(CFG.spanner_home + '/log/_log.log', 'a')
+        fl = open(CFG.spanner_home + '/tmp/_log.log', 'a')
         for x in range(0, count):
             ret = queue.get()
             count_done = count_done + 1
             print ''
             _action_batch_echo_output(ret[1])
             print ret[0] + ' ' + str(count_done) + '/' + str(count) + ' done'
-            fsl = open(CFG.spanner_home + '/log/' + ret[0] +'.log', 'w')
+            fsl = open(CFG.spanner_home + '/tmp/' + ret[0] +'.log', 'w')
             fsl.write(ret[1])
             fsl.close()
             fl.write('\n')
