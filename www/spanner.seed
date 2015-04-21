@@ -1,0 +1,73 @@
+# UBUNTU KICKSTART by YANGYUAN
+# DESIGNED for SPANNER and UBUNTU 12.04 SERVER
+
+# BASIC
+d-i  debian-installer/locale    string en_US.UTF-8
+d-i  debian-installer/splash    boolean false
+d-i  console-setup/ask_detect   boolean false
+d-i  console-setup/layoutcode   string us
+d-i  console-setup/variantcode  string
+d-i  clock-setup/utc            boolean true
+d-i  clock-setup/ntp            boolean true
+
+# DISKPART
+d-i  partman-auto/method                string regular
+d-i  partman-lvm/device_remove_lvm      boolean true
+d-i  partman-lvm/confirm                boolean true
+d-i  partman/confirm_write_new_label    boolean true
+d-i  partman/choose_partition           select Finish partitioning and write changes to disk
+d-i  partman/confirm                    boolean true
+d-i  partman/confirm_nooverwrite        boolean true
+d-i  partman/default_filesystem         string ext4
+
+# SOFTWARE
+d-i  mirror/country             string manual
+d-i  mirror/http/hostname       string $http_server
+d-i  mirror/http/directory      string $spanner_src
+d-i  mirror/http/proxy          string
+d-i  apt-setup/security_host    string $http_server
+d-i  apt-setup/security_path    string $spanner_src
+d-i  apt-setup/services-select  multiselect none
+d-i  pkgsel/upgrade             select none
+d-i  pkgsel/language-packs      multiselect
+d-i  pkgsel/update-policy       select none
+d-i  pkgsel/updatedb            boolean true
+d-i  pkgsel/include             string openssh-server vim
+
+# USER
+d-i  passwd/root-login                  boolean true
+d-i  passwd/make-user                   boolean false
+d-i  passwd/root-password               password $spanner_pwd
+d-i  passwd/root-password-again         password $spanner_pwd
+d-i  user-setup/allow-password-weak     boolean true
+
+# FINISH
+d-i  grub-installer/skip                boolean false
+d-i  lilo-installer/skip                boolean false
+d-i  grub-installer/only_debian         boolean true
+d-i  grub-installer/with_other_os       boolean true
+d-i  finish-install/keep-consoles       boolean false
+d-i  finish-install/reboot_in_progress  note
+d-i  cdrom-detect/eject                 boolean true
+d-i  debian-installer/exit/halt         boolean false
+d-i  debian-installer/exit/poweroff     boolean false
+
+d-i  preseed/late_command string \
+    rm -f /target/etc/network/interfaces && \
+    touch /target/etc/network/interfaces && \
+    echo "auto lo" >> /target/etc/network/interfaces && \
+    echo "iface lo inet loopback" >> /target/etc/network/interfaces && \
+    echo "" >> /target/etc/network/interfaces && \
+    echo "auto br100" >> /target/etc/network/interfaces && \
+    echo "iface br100 inet static" >> /target/etc/network/interfaces && \
+    echo "    address $ip_address_ethx" >> /target/etc/network/interfaces && \
+    echo "    netmask $netmask_ethx" >> /target/etc/network/interfaces && \
+    echo "    gateway $gateway_ethx" >> /target/etc/network/interfaces && \
+    echo "    dns-nameservers $name_servers[0]" >> /target/etc/network/interfaces ; \
+    echo "    bridge-ports $spanner_eth" >> /target/etc/network/interfaces ; \
+    echo "$hostname" >> /target/etc/hostname ; \
+    in-target hostname $hostname ; \
+    wget -q http://$http_server/spanner/sources.list -O /target/etc/apt/sources.list && \
+    wget -q http://$http_server/spanner/spanner.sh -O /target/tmp/spanner.sh && \
+    chmod +x /target/tmp/spanner.sh && \
+    in-target /bin/bash /tmp/spanner.sh ;
